@@ -20,93 +20,94 @@ import com.google.common.collect.ImmutableMap;
 public class StatsdMetricConsumerTest extends TestCase {
 
 	StatsdMetricConsumer undertest;
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		undertest = new StatsdMetricConsumer();
 	}
-	
+
 	public void testParseConfig() {
 		assertNull(undertest.statsdHost);
 		assertEquals("storm.metrics.", undertest.statsdPrefix);
 		assertEquals(8125, undertest.statsdPort);
 		assertNull(undertest.topologyName);
-		
+
 		Map conf = new HashMap();
 		conf.put(StatsdMetricConsumer.STATSD_HOST, "localhost");
 		conf.put(StatsdMetricConsumer.STATSD_PORT, 5555);
 		conf.put(StatsdMetricConsumer.STATSD_PREFIX, "my.statsd.prefix");
 		conf.put(Config.TOPOLOGY_NAME, "myTopologyName");
-		
+
 		undertest.parseConfig(conf);
-		
+
 		assertEquals("localhost", undertest.statsdHost);
 		assertEquals("my.statsd.prefix.", undertest.statsdPrefix);
 		assertEquals(5555, undertest.statsdPort);
 		assertEquals("myTopologyName", undertest.topologyName);
 	}
-	
-	public void testCleanString()
-	{
+
+	public void testCleanString() {
 		assertEquals("test", undertest.clean("test"));
 		assertEquals("test_name", undertest.clean("test/name"));
 		assertEquals("test_name", undertest.clean("test.name"));
 	}
-	
-	public void testPrepare()
-	{
+
+	public void testPrepare() {
 		assertNull(undertest.statsdHost);
 		assertEquals("storm.metrics.", undertest.statsdPrefix);
 		assertEquals(8125, undertest.statsdPort);
 		assertNull(undertest.topologyName);
 		assertNull(undertest.statsd);
-		
+
 		Map stormConf = new HashMap();
 		stormConf.put(Config.TOPOLOGY_NAME, "myTopologyName");
-		
+
 		Map registrationArgument = new HashMap();
 		registrationArgument.put(StatsdMetricConsumer.STATSD_HOST, "localhost");
 		registrationArgument.put(StatsdMetricConsumer.STATSD_PORT, 5555);
-		registrationArgument.put(StatsdMetricConsumer.STATSD_PREFIX, "my.statsd.prefix");
-		
+		registrationArgument.put(StatsdMetricConsumer.STATSD_PREFIX,
+				"my.statsd.prefix");
+
 		undertest.prepare(stormConf, registrationArgument, null, null);
-		
+
 		assertEquals("localhost", undertest.statsdHost);
 		assertEquals("my.statsd.prefix.", undertest.statsdPrefix);
 		assertEquals(5555, undertest.statsdPort);
 		assertEquals("myTopologyName", undertest.topologyName);
 		assertNotNull(undertest.statsd);
 	}
-	
-	public void testDataPointsToMetrics()
-	{
-		TaskInfo taskInfo = new TaskInfo("host1", 6701, "myBolt7", 12, 123456789000L, 60);
+
+	public void testDataPointsToMetrics() {
+		TaskInfo taskInfo = new TaskInfo("host1", 6701, "myBolt7", 12,
+				123456789000L, 60);
 		List<DataPoint> dataPoints = new LinkedList<>();
-		
+
 		dataPoints.add(new DataPoint("my.int", 57));
 		dataPoints.add(new DataPoint("my.long", 57L));
 		dataPoints.add(new DataPoint("my/float", 222f));
 		dataPoints.add(new DataPoint("my_double", 56.0d));
 		dataPoints.add(new DataPoint("ignored", "not a num"));
-		dataPoints.add(new DataPoint("points", 
-			ImmutableMap.<String, Object>of("count", 123, "time", 2342234, "ignored", "not a num")));
-		
+		dataPoints.add(new DataPoint("points", ImmutableMap
+				.<String, Object> of("count", 123, "time", 2342234, "ignored",
+						"not a num")));
+
 		undertest.topologyName = "testTop";
 		undertest.statsdPrefix = "testPrefix";
-		
-		// topology and prefix are used when creating statsd, and statsd client handles adding them
-		// they should not show up here
-		
-		List<Metric> expected = ImmutableList.<Metric>of(
-			new Metric("host1.6701.myBolt7.my_int", 57),
-			new Metric("host1.6701.myBolt7.my_long", 57),
-			new Metric("host1.6701.myBolt7.my_float", 222),
-			new Metric("host1.6701.myBolt7.my_double", 56),
-			new Metric("host1.6701.myBolt7.points.count", 123),
-			new Metric("host1.6701.myBolt7.points.time", 2342234)
-		);
 
-		assertEquals(expected, undertest.dataPointsToMetrics(taskInfo, dataPoints));
-		
+		// topology and prefix are used when creating statsd, and statsd client
+		// handles adding them
+		// they should not show up here
+
+		List<Metric> expected = ImmutableList.<Metric> of(new Metric(
+				"host1.6701.myBolt7.my_int", 57), new Metric(
+				"host1.6701.myBolt7.my_long", 57), new Metric(
+				"host1.6701.myBolt7.my_float", 222), new Metric(
+				"host1.6701.myBolt7.my_double", 56), new Metric(
+				"host1.6701.myBolt7.points.count", 123), new Metric(
+				"host1.6701.myBolt7.points.time", 2342234));
+
+		assertEquals(expected,
+				undertest.dataPointsToMetrics(taskInfo, dataPoints));
+
 	}
 }
