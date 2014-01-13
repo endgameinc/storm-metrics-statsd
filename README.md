@@ -99,7 +99,7 @@ storm-metrics-statsd
         
 Copyright 2014 [Endgame, Inc.](http://www.endgame.com/)
 
-![Endgame, Inc.](http://www.endgame.com/images/navlogo.png)
+![Endgame, Inc.](http://www.endgame.com/images/logo.svg)
       
 
         Licensed under the Apache License, Version 2.0 (the "License"); you may
