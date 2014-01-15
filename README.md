@@ -13,7 +13,7 @@ storm-metrics-statsd is a module for [Storm](http://storm-project.net/) that ena
 This module can be used in two ways:
 
 1. Configure it for each topology by calling `Conf.registerMetricsConsumer()` prior to launching the topology.
-2. Deploy and cobfigure system wide so usage of this is transparent across all topologies.
+2. Deploy and configure system wide so usage of this is transparent across all topologies.
 
 ### Configure each topology separately
 
