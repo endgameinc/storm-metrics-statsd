@@ -4,7 +4,7 @@ storm-metrics-statsd is a module for [Storm](http://storm-project.net/) that ena
 
 ## Building/Installation
 
-    git clone <storm-metrics-statsd git URL>
+    git clone https://github.com/endgameinc/storm-metrics-statsd.git
     cd storm-metrics-statsd
     mvn compile package install
 
@@ -17,7 +17,7 @@ This module can be used in two ways:
 
 ### Configure each topology separately
 
-Add this as a dependency to you `pom.xml`
+Add this as a dependency to your `pom.xml`
 
     <dependency>
       <groupId>com.endgame</groupId>
