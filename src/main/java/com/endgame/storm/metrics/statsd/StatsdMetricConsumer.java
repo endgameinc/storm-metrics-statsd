@@ -87,7 +87,7 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 	}
 
 	String clean(String s) {
-		return s.replace('.', '_').replace('/', '_');
+		return s.replace('.', '_').replace('/', '_').replace(':', '_');
 	}
 
 	@Override
@@ -170,7 +170,7 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 
 	public void report(String s, int number) {
 		LOG.debug("reporting: {}={}", s, number);
-		statsd.count(s, number);
+		statsd.recordGaugeValue(s, number);
 	}
 
 	@Override
