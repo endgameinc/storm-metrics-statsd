@@ -139,7 +139,8 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 		StringBuilder sb = new StringBuilder()
 				.append(clean(taskInfo.srcWorkerHost)).append(".")
 				.append(taskInfo.srcWorkerPort).append(".")
-				.append(clean(taskInfo.srcComponentId)).append(".");
+				.append(clean(taskInfo.srcComponentId)).append(".")
+				.append(taskInfo.srcTaskId).append(".");
 
 		int hdrLength = sb.length();
 
