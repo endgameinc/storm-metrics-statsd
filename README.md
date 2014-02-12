@@ -85,6 +85,8 @@ System wide deployment requires three steps:
 
 ### Notes
 
+#### Topology Name
+
 You can override the topology name used when reporting to statsd by calling:
 
     statsdConfig.put(Config.TOPOLOGY_NAME, "myTopologyName");
@@ -92,6 +94,14 @@ You can override the topology name used when reporting to statsd by calling:
     statsdConfig.put("topology.name", "myTopologyName");
 
 This will be useful if you use versioned topology names (.e.g. appending a timestamp or a version string), but only care to track them as one in statsd.    
+
+#### Statsd Metric Type
+
+You can configure the Statsd metric type to be sent to Statsd with the following property:
+
+    metrics.statsd.metric_type
+
+Allowed values are `counter` (the default) and `gauge`.
 
 ## License
 
