@@ -46,6 +46,7 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 	public static final String STATSD_PORT = "metrics.statsd.port";
 	public static final String STATSD_PREFIX = "metrics.statsd.prefix";
 	public static final String STATSD_METRIC_TYPE = "metrics.statsd.metric_type";
+	public static final String STATSD_INCLUDE_TASKID = "metrics.statsd.include_task_id";
 
 	enum StatsdMetricType {
 		COUNTER("counter"),
@@ -78,6 +79,7 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 	int statsdPort = 8125;
 	String statsdPrefix = "storm.metrics.";
 	StatsdMetricType statsdMetricType = StatsdMetricType.COUNTER;
+	boolean includeTaskId = false;
 
 	transient StatsDClient statsd;
 
@@ -115,6 +117,10 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 		
 		if (conf.containsKey(STATSD_METRIC_TYPE)) {
 			statsdMetricType = StatsdMetricType.fromString((String) conf.get(STATSD_METRIC_TYPE));
+		}
+		
+		if (conf.containsKey(STATSD_INCLUDE_TASKID)) {
+			includeTaskId = Boolean.parseBoolean((String) conf.get(STATSD_INCLUDE_TASKID));
 		}
 	}
 
@@ -171,8 +177,11 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 		StringBuilder sb = new StringBuilder()
 				.append(clean(taskInfo.srcWorkerHost)).append(".")
 				.append(taskInfo.srcWorkerPort).append(".")
-				.append(clean(taskInfo.srcComponentId)).append(".")
-				.append(taskInfo.srcTaskId).append(".");
+				.append(clean(taskInfo.srcComponentId)).append(".");
+
+		if (includeTaskId) {
+			sb.append(taskInfo.srcTaskId).append(".");
+		}
 
 		int hdrLength = sb.length();
 
