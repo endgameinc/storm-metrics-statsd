@@ -103,6 +103,12 @@ You can configure the Statsd metric type to be sent to Statsd with the following
 
 Allowed values are `counter` (the default) and `gauge`.
 
+#### Statsd Metric Name
+
+You can include the Storm Task ID in the Statsd metric name by setting the following property to `true`:
+
+    metrics.statsd.include_task_id
+
 ## License
 
 storm-metrics-statsd
