@@ -33,6 +33,7 @@ import backtype.storm.metric.api.IMetricsConsumer;
 import backtype.storm.task.IErrorReporter;
 import backtype.storm.task.TopologyContext;
 
+import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 
 /**
@@ -53,6 +54,7 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 
 	transient StatsDClient statsd;
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, Object registrationArgument,
 			TopologyContext context, IErrorReporter errorReporter) {
@@ -62,10 +64,10 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 			parseConfig((Map) registrationArgument);
 		}
 
-		statsd = new StatsDClient(statsdPrefix + clean(topologyName), statsdHost, statsdPort);
+		statsd = new NonBlockingStatsDClient(statsdPrefix + clean(topologyName), statsdHost, statsdPort);
 	}
 
-	void parseConfig(Map conf) {
+	void parseConfig(@SuppressWarnings("rawtypes") Map conf) {
 		if (conf.containsKey(Config.TOPOLOGY_NAME)) {
 			topologyName = (String) conf.get(Config.TOPOLOGY_NAME);
 		}
@@ -152,6 +154,7 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 				res.add(new Metric(sb.toString(), ((Number) p.value).intValue()));
 			} else if (p.value instanceof Map) {
 				int hdrAndNameLength = sb.length();
+				@SuppressWarnings("rawtypes")
 				Map map = (Map) p.value;
 				for (Object subName : map.keySet()) {
 					Object subValue = map.get(subName);
