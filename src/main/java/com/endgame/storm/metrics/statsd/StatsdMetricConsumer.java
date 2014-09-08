@@ -46,11 +46,41 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 	public static final String STATSD_HOST = "metrics.statsd.host";
 	public static final String STATSD_PORT = "metrics.statsd.port";
 	public static final String STATSD_PREFIX = "metrics.statsd.prefix";
+	public static final String STATSD_METRIC_TYPE = "metrics.statsd.metric_type";
+	public static final String STATSD_INCLUDE_TASKID = "metrics.statsd.include_task_id";
 
+	enum StatsdMetricType {
+		COUNTER("counter"),
+		GAUGE("gauge");
+		
+		private String metricType;
+		
+		StatsdMetricType(String metricType) {
+			this.metricType = metricType;
+		}
+		
+		public String getMetricType() {
+			return metricType;
+		}
+		
+		public static StatsdMetricType fromString(String metricType) {
+			if (metricType != null) {
+				for (StatsdMetricType type : StatsdMetricType.values()) {
+					if (metricType.equalsIgnoreCase(type.metricType)) {
+						return type;
+					}
+				}
+			}
+			throw new IllegalArgumentException("No metric type " + metricType + " found");
+		}
+	}
+	
 	String topologyName;
 	String statsdHost;
 	int statsdPort = 8125;
 	String statsdPrefix = "storm.metrics.";
+	StatsdMetricType statsdMetricType = StatsdMetricType.COUNTER;
+	boolean includeTaskId = false;
 
 	transient StatsDClient statsd;
 
@@ -86,10 +116,18 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 				statsdPrefix += ".";
 			}
 		}
+		
+		if (conf.containsKey(STATSD_METRIC_TYPE)) {
+			statsdMetricType = StatsdMetricType.fromString((String) conf.get(STATSD_METRIC_TYPE));
+		}
+		
+		if (conf.containsKey(STATSD_INCLUDE_TASKID)) {
+			includeTaskId = Boolean.parseBoolean((String) conf.get(STATSD_INCLUDE_TASKID));
+		}
 	}
 
 	String clean(String s) {
-		return s.replace('.', '_').replace('/', '_');
+		return s.replace('.', '_').replace('/', '_').replace(':', '_');
 	}
 
 	@Override
@@ -143,6 +181,10 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 				.append(taskInfo.srcWorkerPort).append(".")
 				.append(clean(taskInfo.srcComponentId)).append(".");
 
+		if (includeTaskId) {
+			sb.append(taskInfo.srcTaskId).append(".");
+		}
+
 		int hdrLength = sb.length();
 
 		for (DataPoint p : dataPoints) {
@@ -171,8 +213,17 @@ public class StatsdMetricConsumer implements IMetricsConsumer {
 	}
 
 	public void report(String s, int number) {
-		LOG.debug("reporting: {}={}", s, number);
-		statsd.count(s, number);
+		LOG.debug("reporting " + statsdMetricType + ": {}={}", s, number);
+		
+		switch (statsdMetricType) {
+		case COUNTER:
+			statsd.count(s, number);
+			break;
+		case GAUGE:
+			statsd.recordGaugeValue(s, number);
+			break;
+		default:
+		}
 	}
 
 	@Override
