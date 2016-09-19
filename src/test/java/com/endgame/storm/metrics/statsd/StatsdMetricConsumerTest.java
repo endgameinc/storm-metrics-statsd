@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import backtype.storm.Config;
-import backtype.storm.metric.api.IMetricsConsumer.DataPoint;
-import backtype.storm.metric.api.IMetricsConsumer.TaskInfo;
+import org.apache.storm.Config;
+import org.apache.storm.metric.api.IMetricsConsumer.DataPoint;
+import org.apache.storm.metric.api.IMetricsConsumer.TaskInfo;
 
 import com.endgame.storm.metrics.statsd.StatsdMetricConsumer.Metric;
 import com.google.common.collect.ImmutableList;
